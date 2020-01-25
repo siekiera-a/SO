@@ -1,4 +1,4 @@
-#include "semaphore_utils.h"
+#include "semaphore.h"
 
 static struct sembuf buf;
 

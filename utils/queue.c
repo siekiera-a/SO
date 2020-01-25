@@ -1,4 +1,4 @@
-#include "queue_utils.h"
+#include "queue.h"
 
 int open_queue(key_t key)
 {
