@@ -2,9 +2,9 @@
 
 static struct sembuf buf;
 
-int sem_get()
+int sem_get(__key_t key)
 {
-	return semget(ftok(".", 'A'), SEM_COUNT, IPC_CREAT | 0660);
+	return semget(key, SEM_COUNT, IPC_CREAT | 0660);
 }
 
 int sem_up(int semid, int semnum)

@@ -1,13 +1,21 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/sem.h>
 
 #include "utils/constans.h"
 #include "utils/queue.h"
 #include "consumers/consumer_input.h"
+#include "consumers/consumer_processing.h"
 
-__pid_t pids[PIDS_COUNT] = {0};
+__pid_t pids[PIDS_COUNT];
 FILE *stream;
+// queue id
 int qid;
+// semaphore id
+int semid;
+// file write descriptor
+int f_write;
 
 int main(int argc, char *argv[])
 {
@@ -32,11 +40,23 @@ int main(int argc, char *argv[])
 	}
 
 	__key_t queue_key = ftok(".", 'A');
-	qid = open_queue(queue_key);
+	__key_t sem_key = ftok(".", 'B');
 
-	if (qid == -1)
+	if ((qid = open_queue(queue_key)) == -1)
 	{
 		perror("Queue");
+		return 2;
+	}
+
+	if ((semid = sem_get(sem_key)) == -1)
+	{
+		perror("Semaphore");
+		return 2;
+	}
+
+	if ((f_write = open(FILE_NAME, O_WRONLY | O_CREAT | O_TRUNC)) == -1)
+	{
+		perror("File write descriptor");
 		return 2;
 	}
 
@@ -50,6 +70,7 @@ int main(int argc, char *argv[])
 
 	if ((pids[2] = fork()) == 0)
 	{
+		run_processing_consumer(qid, semid, f_write);
 		return 1;
 	}
 
