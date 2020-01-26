@@ -7,6 +7,7 @@
 #include "utils/queue.h"
 #include "consumers/consumer_input.h"
 #include "consumers/consumer_processing.h"
+#include "consumers/consumer_output.h"
 
 __pid_t pids[PIDS_COUNT];
 FILE *stream;
@@ -16,6 +17,8 @@ int qid;
 int semid;
 // file write descriptor
 int f_write;
+// file read descriptor
+int f_read;
 
 int main(int argc, char *argv[])
 {
@@ -54,9 +57,18 @@ int main(int argc, char *argv[])
 		return 2;
 	}
 
-	if ((f_write = open(FILE_NAME, O_WRONLY | O_CREAT | O_TRUNC)) == -1)
+	semctl(semid, 0, SETVAL, (int)1);
+	semctl(semid, 1, SETVAL, (int)0);
+
+	if ((f_write = open(FILE_NAME, O_WRONLY | O_CREAT | O_TRUNC, 0666)) == -1)
 	{
 		perror("File write descriptor");
+		return 2;
+	}
+
+	if ((f_read = open(FILE_NAME, O_RDONLY)) == -1)
+	{
+		perror("File read descriptor");
 		return 2;
 	}
 
@@ -76,6 +88,7 @@ int main(int argc, char *argv[])
 
 	if ((pids[3] = fork()) == 0)
 	{
+		run_output_consumer(semid, f_read);
 		return 1;
 	}
 
