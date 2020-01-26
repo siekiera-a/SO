@@ -2,9 +2,12 @@
 #include <unistd.h>
 
 #include "utils/constans.h"
+#include "utils/queue.h"
+#include "consumers/consumer_input.h"
 
 __pid_t pids[PIDS_COUNT] = {0};
 FILE *stream;
+int qid;
 
 int main(int argc, char *argv[])
 {
@@ -28,10 +31,20 @@ int main(int argc, char *argv[])
 		stream = f;
 	}
 
+	__key_t queue_key = ftok(".", 'A');
+	qid = open_queue(queue_key);
+
+	if (qid == -1)
+	{
+		perror("Queue");
+		return 2;
+	}
+
 	pids[0] = getpid();
 
 	if ((pids[1] = fork()) == 0)
 	{
+		run_input_consumer(stream, qid);
 		return 1;
 	}
 
