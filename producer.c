@@ -2,12 +2,14 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/sem.h>
+#include <signal.h>
 
 #include "utils/constans.h"
 #include "utils/queue.h"
 #include "consumers/consumer_input.h"
 #include "consumers/consumer_processing.h"
 #include "consumers/consumer_output.h"
+#include "utils/constans.h"
 
 __pid_t pids[PIDS_COUNT];
 FILE *stream;
@@ -19,6 +21,24 @@ int semid;
 int f_write;
 // file read descriptor
 int f_read;
+
+// Free all resources
+void clean_up(int sig)
+{
+	for (int i = 1; i < PIDS_COUNT; i++)
+		kill(pids[i], SIGKILL);
+
+	fclose(stream);
+
+	close(f_write);
+	close(f_read);
+	remove(FILE_NAME);
+
+	remove_queue(qid);
+	sem_remove(semid);
+
+	kill(pids[0], SIGKILL);
+}
 
 int main(int argc, char *argv[])
 {
@@ -73,6 +93,7 @@ int main(int argc, char *argv[])
 	}
 
 	pids[0] = getpid();
+	signal(SIG_CLOSE, clean_up);
 
 	if ((pids[1] = fork()) == 0)
 	{
