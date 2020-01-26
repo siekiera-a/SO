@@ -10,6 +10,7 @@
 #include "consumers/consumer_processing.h"
 #include "consumers/consumer_output.h"
 #include "utils/constans.h"
+#include "utils/pids.h"
 
 __pid_t pids[PIDS_COUNT];
 FILE *stream;
@@ -36,6 +37,8 @@ void clean_up(int sig)
 
 	remove_queue(qid);
 	sem_remove(semid);
+
+	remove(PIDS_FILE);
 
 	kill(pids[0], SIGKILL);
 }
@@ -113,6 +116,8 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	save_pids(pids);
+	
 	while (1)
 		pause();
 }

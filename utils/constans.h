@@ -3,6 +3,7 @@
 
 #define PIDS_COUNT 4
 #define FILE_NAME "file"
+#define PIDS_FILE "pids"
 
 static const int SIG_PAUSE = SIGINT;
 static const int SIG_RESUME = SIGCONT;
