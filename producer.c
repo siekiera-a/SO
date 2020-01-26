@@ -4,12 +4,12 @@
 #include <sys/sem.h>
 #include <signal.h>
 
-#include "utils/constans.h"
+#include "utils/variables.h"
 #include "utils/queue.h"
 #include "consumers/consumer_input.h"
 #include "consumers/consumer_processing.h"
 #include "consumers/consumer_output.h"
-#include "utils/constans.h"
+#include "utils/variables.h"
 #include "utils/pids.h"
 
 __pid_t pids[PIDS_COUNT];
