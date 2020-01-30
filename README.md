@@ -12,3 +12,10 @@ Unix system e.g Ubuntu
 
 ## Executable files
 All executable files can be found in out directory.
+
+## Signals sent to children
+SIGINT - pause program
+SIGCONT - resume program
+SIGQUIT - close program
+
+Those signals can be changed in utils/variables.h file
