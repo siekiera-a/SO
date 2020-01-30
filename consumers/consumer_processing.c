@@ -1,5 +1,13 @@
 #include "consumer_processing.h"
 
+__pid_t pids_cp[PIDS_COUNT] = { -1 };
+int flag_cp = 0;
+
+void handler_cp(int sig)
+{
+	signal_handler(sig, &flag_cp, pids_cp);
+}
+
 void uchar_to_hex(unsigned char x, char output[])
 {
 	output[0] = x / 16;
@@ -21,12 +29,19 @@ void run_processing_consumer(int qid, int semid, int f_write)
 {
 	struct msgbuf buffer;
 	buffer.data = 0;
-	char hex[3];
-	hex[3] = 0;
+	char hex[2];
+
+	struct msqid_ds buf;
+
+	init_signals(handler_cp);
 
 	while (buffer.data != EOF)
 	{
-		read_message(qid, M_TYPE, &buffer);
+		while (flag_cp)
+			sleep(1);
+
+		if (read_message(qid, M_TYPE, &buffer) == -1)
+			continue;	
 
 		if (buffer.data == EOF)
 		{
@@ -38,7 +53,7 @@ void run_processing_consumer(int qid, int semid, int f_write)
 
 		sem_down(semid, 0);
 		lseek(f_write, 0, SEEK_SET);
-		write(f_write, hex, sizeof(char) * 3);
+		write(f_write, hex, sizeof(char) * 2);
 		sem_up(semid, 1);
 	}
 }

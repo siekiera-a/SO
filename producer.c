@@ -96,7 +96,6 @@ int main(int argc, char *argv[])
 	}
 
 	pids[0] = getpid();
-	signal(SIG_CLOSE, clean_up);
 
 	if ((pids[1] = fork()) == 0)
 	{
@@ -115,6 +114,8 @@ int main(int argc, char *argv[])
 		run_output_consumer(semid, f_read);
 		return 1;
 	}
+
+	signal(SIG_CLOSE, clean_up);
 
 	save_pids(pids);
 	

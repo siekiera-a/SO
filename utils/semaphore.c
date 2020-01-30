@@ -7,20 +7,20 @@ int sem_get(__key_t key)
 	return semget(key, SEM_COUNT, IPC_CREAT | 0660);
 }
 
-int sem_up(int semid, int semnum)
+void sem_up(int semid, int semnum)
 {
 	buf.sem_num = semnum;
 	buf.sem_op = 1;
 	buf.sem_flg = 0;
-	return semop(semid, &buf, 1);
+	while (semop(semid, &buf, 1) == -1);
 }
 
-int sem_down(int semid, int semnum)
+void sem_down(int semid, int semnum)
 {
 	buf.sem_num = semnum;
 	buf.sem_op = -1;
 	buf.sem_flg = 0;
-	return semop(semid, &buf, 1);
+	while (semop(semid, &buf, 1) == -1);
 }
 
 void sem_remove(int semid)
